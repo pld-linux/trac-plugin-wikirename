@@ -11,6 +11,7 @@ Source0:	%{plugin}plugin.zip
 # Source0-md5:	16637f1de20736455568f8fa30c2e935
 URL:		http://trac-hacks.org/wiki/WikiRenamePlugin
 BuildRequires:	python-devel
+BuildRequires:	unzip
 Requires:	trac >= %{trac_ver}
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
