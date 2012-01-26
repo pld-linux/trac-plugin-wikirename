@@ -3,16 +3,15 @@
 Summary:	Add simple support for renaming/moving wiki pages
 Name:		trac-plugin-%{plugin}
 Version:	2.1.1
-Release:	0.1
+Release:	1
 License:	BSD
 Group:		Applications/WWW
-# Source0Download:	http://trac-hacks.org/changeset/latest/wikirenameplugin?old_path=/&filename=wikirenameplugin&format=zip
-Source0:	%{plugin}plugin.zip
-# Source0-md5:	16637f1de20736455568f8fa30c2e935
+Source0:	http://trac-hacks.org/changeset/latest/wikirenameplugin?old_path=/&format=zip#/%{plugin}-%{version}.zip
+# Source0-md5:	c2c5d628406ca268d59bf231386e062a
 URL:		http://trac-hacks.org/wiki/WikiRenamePlugin
 BuildRequires:	python-devel
 BuildRequires:	unzip
-Requires:	trac >= %{trac_ver}
+Requires:	trac >= %{trac_ver}.7-3
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -33,16 +32,18 @@ convenience, a link is also added to the context navigation bar in the
 wiki.
 
 %prep
-%setup -q -n %{plugin}plugin
+%setup -qc
+mv %{plugin}plugin/%{trac_ver}/* .
 
 %build
-cd %{trac_ver}
 %{__python} setup.py build
 %{__python} setup.py egg_info
 
+ver=$(awk '$1 == "Version:" {print $2}' *.egg-info/PKG-INFO)
+test "$ver" = %{version}
+
 %install
 rm -rf $RPM_BUILD_ROOT
-cd %{trac_ver}
 %{__python} setup.py install \
 	--single-version-externally-managed \
 	--optimize 2 \
@@ -54,18 +55,11 @@ cd %{trac_ver}
 rm -rf $RPM_BUILD_ROOT
 
 %post
-if [ "$1" = "1" ]; then
-	%banner -e %{name} <<-'EOF'
-	To enable the %{plugin} plugin, add to conf/trac.ini:
-
-	[components]
-	%{plugin}.* = enabled
-EOF
-fi
+trac-enableplugin "%{plugin}.*"
 
 %files
 %defattr(644,root,root,755)
-%doc %{trac_ver}/README
+%doc README
 %attr(755,root,root) %{_bindir}/trac-wikirename
 %{py_sitescriptdir}/%{plugin}
 %{py_sitescriptdir}/TracWikiRename-*.egg-info
